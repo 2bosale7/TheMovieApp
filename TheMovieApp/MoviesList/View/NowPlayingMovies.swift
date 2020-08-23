@@ -33,7 +33,7 @@ class NowPlayingMovies: ParentViewController {
     func getNowPlayingMovies(){
         if isNetworkReachable {
             self.showLoader()
-            moviePresenter.nowPlayingMovies(onSuccess: { (movies) in
+            moviePresenter.moviesList(movieId: nil, onSuccess: { (movies) in
                 self.nowPlayingMovies = movies
                 self.nowPlayingMoviesCV.reloadData()
                 self.hideLoader()

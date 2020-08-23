@@ -11,9 +11,14 @@ import SwiftyJSON
 
 class MoviePresenter:NSObject {
     
-    func nowPlayingMovies(onSuccess: @escaping ([Movie]) -> Void, onFailure: @escaping (String?) -> Void ) -> Void
+    func moviesList(movieId:Int?, onSuccess: @escaping ([Movie]) -> Void, onFailure: @escaping (String?) -> Void ) -> Void
     {
-        let url = URLManager().getNowPlayingMovies()
+        var url = ""
+        if let id = movieId {
+             url = URLManager().getSimilarMovies(movieId: id)
+        }else{
+             url = URLManager().getNowPlayingMovies()
+        }
         
         ServiceManager.callAPI(url: url, method: .get, parameters: nil, custumHeaders: nil) { (error, response) in
             if response != nil

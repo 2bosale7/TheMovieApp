@@ -12,6 +12,10 @@ class MovieDetailsVC: ParentViewController {
     
     var movieDetails:Movie!
     var genres = [Genre]()
+    var similarMovies = [Movie]()
+    
+    let moviePresenter = MoviePresenter()
+    var numberOfTVRows = 3
 
     @IBOutlet weak var movieDetailsTV: UITableView!
     
@@ -24,12 +28,30 @@ class MovieDetailsVC: ParentViewController {
         movieDetailsTV.estimatedRowHeight = 60
         
         title = movieDetails.title
+        getSimilarMovies()
+    }
+    
+    func getSimilarMovies(){
+        if isNetworkReachable {
+            self.showLoader()
+            moviePresenter.moviesList(movieId: movieDetails.id ?? 0, onSuccess: { (movies) in
+                self.similarMovies = movies
+                self.numberOfTVRows += movies.count + 1
+                self.movieDetailsTV.reloadData()
+                self.hideLoader()
+            }) { (errorMessage) in
+                self.hideLoader()
+                self.showAlert(title: "", message: errorMessage ?? "Error", shouldpop: false)
+            }
+        }else{
+            self.showAlert(title: "", message: "No, Internet connection", shouldpop: false)
+        }
     }
 }
 
 extension MovieDetailsVC: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 3
+        return numberOfTVRows
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -42,9 +64,21 @@ extension MovieDetailsVC: UITableViewDataSource {
             let cell = tableView.dequeueReusableCell(withIdentifier: "GenresCell", for: indexPath) as! GenresCell
             cell.configCell(releaseDate: movieDetails.release_date ?? "", genres: genersTitles)
             return cell
-        }else{
+        }else if indexPath.row == 2{
             let cell = tableView.dequeueReusableCell(withIdentifier: "overViewCell", for: indexPath) as! overViewCell
             cell.configCell(overView: movieDetails.overview ?? "")
+            return cell
+        }else if indexPath.row == 3 {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "headerCell", for: indexPath)
+            cell.textLabel?.text = "Similar Movies"
+            cell.textLabel?.textAlignment = .center
+            cell.textLabel?.font = UIFont(name: "Helvetica Neue", size: 18)
+            cell.textLabel?.textColor = UIColor.cyan
+            return cell
+        }else{
+            let cell = tableView.dequeueReusableCell(withIdentifier: "SimilarMovieCell", for: indexPath) as! SimilarMovieCell
+            
+            cell.configCell(movie: similarMovies[indexPath.row - 4], allGenres: genres)
             return cell
         }
     }
@@ -56,10 +90,14 @@ extension MovieDetailsVC: UITableViewDataSource {
             let cellHeight = tvheight - (tvheight / 4)
             
             return  cellHeight
-        }else {
-             return UITableView.automaticDimension
-        }
         
+        }else if indexPath.row == 3{
+            return CGFloat(60)
+        }else if indexPath.row == 1 || indexPath.row == 2{
+             return UITableView.automaticDimension
+        }else {
+            return CGFloat(200)
+        }
     }
     
 }

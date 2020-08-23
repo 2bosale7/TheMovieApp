@@ -45,4 +45,8 @@ class URLManager {
     func getGenres() -> String {
         return "\(getCurrentBaseUrl())/genre/movie/list?api_key=18946364666c55b73b60bce5003b901c&language=en-US"
     }
+    
+    func getSimilarMovies(movieId: Int) -> String{
+        return "\(getCurrentBaseUrl())/movie/\(movieId)/similar?api_key=18946364666c55b73b60bce5003b901c&language=en-US&page=1"
+    }
 }
